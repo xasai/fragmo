@@ -23,29 +23,32 @@ func (h *StorageServerHandler) Download(req *rpc.DownloadReq, stream rpc.Storage
 
 	fileIdx := 0
 
-	//Read all files until some file chunk not exists
+	//Read and send all chunks of file until some file chunk does not exist exists
 	for {
+
 		fileIdx++
 		filename := h.chunkName(req.Filename, fileIdx)
 		f, err := os.OpenFile(filename, os.O_RDONLY, 0)
 		if err != nil {
-			break
+			if os.IsNotExist(err) {
+				break
+			}
+			log.Error().Err(err).Send()
+			return err
 		}
 
 		_, err = f.Read(res.Data)
 		if err != nil {
-			break
+			log.Error().Err(err).Send()
+			return err
 		}
 
 		err = stream.Send(res)
 		if err != nil {
-			break
+			log.Error().Err(err).Send()
+			return err
 		}
 	}
 
-	if err != nil {
-		log.Error().Err(err).Send()
-	}
-
-	return err
+	return nil
 }

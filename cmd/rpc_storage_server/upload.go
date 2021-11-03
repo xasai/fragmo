@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"os"
 
 	"github.com/rs/zerolog/log"
-	cfg "github.com/xasai/fragmo/config"
 	"github.com/xasai/fragmo/rpc"
 )
 
@@ -16,7 +14,7 @@ func (h *StorageServerHandler) Upload(stream rpc.StorageService_UploadServer) er
 	const op = "StorageServerHandler.Upload"
 	log.Info().Msg(op)
 
-	//store file chunks in slice to delete them if err happen
+	//store file chunks here to delete them if err happend
 	var files = []string{}
 
 	for {
@@ -33,7 +31,7 @@ func (h *StorageServerHandler) Upload(stream rpc.StorageService_UploadServer) er
 		log.Info().Str("filename", req.Filename).Int32("index", req.Index).
 			Msgf("received %.2f Mb of data", float32(len(req.Data))/(1<<20))
 
-		filename := cfg.StoragePath + fmt.Sprintf("%s_%d", req.Filename, req.Index)
+		filename := h.chunkName(req.Filename, int(req.Index))
 
 		f, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0666)
 		if err != nil {
