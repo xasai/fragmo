@@ -16,19 +16,14 @@ import (
 )
 
 var (
-	storage   rpc.StorageServiceClient
-	recorder  = NewRecorder(cfg.RecordsFilename)
+	recorder  FileRecorder = NewRecorder(cfg.RecordsFilename)
 	templates *template.Template
+	storage   rpc.StorageServiceClient
 )
 
-func init() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-}
-
 func main() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	defer recorder.Close()
-
-	templates = template.Must(template.ParseGlob(cfg.TemplatesPath + "/*"))
 
 	log.Info().Msgf("connecting to storage_server on %s", cfg.StorageServerAddr)
 	storageConnection, err := grpc.Dial(
@@ -37,20 +32,18 @@ func main() {
 		grpc.WithBlock(),
 		grpc.WithTimeout(time.Millisecond*1000),
 	)
-
 	if err != nil {
-		log.Fatal().Err(err).Msgf("connecting to storage_server %s", cfg.StorageServerAddr)
+		log.Fatal().Err(err).Msgf(cfg.StorageServerAddr)
 	}
 	defer storageConnection.Close()
-	log.Info().Msgf("connected to storage_server on %s", cfg.StorageServerAddr)
-
 	storage = rpc.NewStorageServiceClient(storageConnection)
 
+	templates = template.Must(template.ParseGlob(cfg.TemplatesPath + "*"))
+
 	r := mux.NewRouter()
-	r.HandleFunc("/", listHandler)
-	r.HandleFunc("/list", listHandler)
-	r.HandleFunc("/download", downloadHandler)
+	r.HandleFunc("/", indexHandler)
 	r.HandleFunc("/upload", uploadHandler)
+	r.HandleFunc("/download", downloadHandler).Queries("file", "{file}")
 	r.Use(LoggerMware)
 
 	http.Handle("/", r)
@@ -62,6 +55,7 @@ func main() {
 		IdleTimeout:  time.Second * 60,
 		Handler:      r,
 	}
+
 	log.Info().Msgf("%s serve on http://%s", os.Args[0], srv.Addr)
 	log.Error().Err(srv.ListenAndServe())
 }

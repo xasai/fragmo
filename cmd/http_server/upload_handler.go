@@ -14,47 +14,22 @@ import (
 	"github.com/xasai/fragmo/rpc"
 )
 
-func LoggerMware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		log.Info().Str("URI", req.RequestURI).Msg(req.Method)
-		next.ServeHTTP(w, req)
-	})
-}
-
-///////////////////////
-// HANDLERS
-///////////////////////
-func listHandler(w http.ResponseWriter, req *http.Request) {
-	const op = "listHandler"
-
-	err := templates.ExecuteTemplate(w, "index.html", recorder.GetRecords())
-	if err != nil {
-		log.Error().Err(err).Msg(op + ".ExecuteTemplate")
-	}
-}
 func uploadHandler(w http.ResponseWriter, req *http.Request) {
 	const op = "uploadHandler"
 
 	if req.Method == "POST" {
-		upload(w, req)
+		uploadFiles(w, req)
 	}
 
-	if err := templates.ExecuteTemplate(w, "upload.html", nil); err != nil {
+	err := templates.ExecuteTemplate(w, "upload.html", nil)
+	if err != nil {
 		log.Error().Err(err).Msg(op + ".ExecuteTemplate")
 	}
 }
 
-func downloadHandler(w http.ResponseWriter, req *http.Request) {
-	const op = "downloadHandler"
-	http.Redirect(w, req, "/", http.StatusMovedPermanently)
-}
-
-///////////////////////
-// UPLOAD LOGIC
-///////////////////////
 //uplaod read all files in separate goroutines and send them to the storage_server by stream
 //It reads no more than 1 Mb from file at once and fill last chunk of file with zeroes if its size less than 1 Mb
-func upload(w http.ResponseWriter, req *http.Request) {
+func uploadFiles(w http.ResponseWriter, req *http.Request) {
 	const op = "upload"
 
 	req.ParseMultipartForm(32 << 20)
@@ -127,7 +102,7 @@ func upload(w http.ResponseWriter, req *http.Request) {
 				}
 			}
 
-			//Fill last fragment with zero bytes t
+			//Fill last fragment with zeroes
 			left := size % cfg.FragmentSize
 			for i := int64(0); i < left; i++ {
 				buf[cfg.FragmentSize-left+i] = 0

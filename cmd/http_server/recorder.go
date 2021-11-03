@@ -14,6 +14,7 @@ type FileRecorder interface {
 	Exist(string) bool
 	AddRecord(string, int64)
 	GetRecords() Records
+	GetSize(string) int64
 	Close()
 }
 
@@ -37,6 +38,14 @@ func (r *fileRecorder) Exist(filename string) bool {
 	return x
 }
 
+//GetSize return file size or -1 if there no such file
+func (r *fileRecorder) GetSize(filename string) int64 {
+	if _, ok := r.records[filename]; !ok {
+		return -1
+	}
+	return r.records[filename]
+}
+
 //AddRecord write new record to the recordsFile and to records map
 func (r *fileRecorder) AddRecord(filename string, size int64) {
 	const op = "AddRecord"
@@ -57,7 +66,7 @@ func (r *fileRecorder) AddRecord(filename string, size int64) {
 }
 
 func (r *fileRecorder) RemoveRecord(filename string, size int64) {
-	panic("unimplemented :(")
+	panic("unimplemented")
 }
 
 //GetRecords returns all records
