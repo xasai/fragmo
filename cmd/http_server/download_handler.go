@@ -31,7 +31,7 @@ func downloadHandler(w http.ResponseWriter, req *http.Request) {
 		Filename: filename,
 	}
 
-	w.Header().Set("Content-Disposition", "attachment; filename="+url.QueryEscape(filename))
+	w.Header().Set("Content-Disposition", "attachment; filename="+filename)
 	w.Header().Set("Content-Type", req.Header.Get("Content-Type"))
 	w.Header().Set("Content-Lenght", strconv.FormatInt(recorder.GetSize(filename), 10))
 

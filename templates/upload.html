@@ -26,6 +26,7 @@
     var fileListDisplay = document.getElementById('file-list');
 
     function renderFiles() {
+		fileListDisplay.innerHTML = ""
         var size = 0;
         var files = this.files;
         for (var i = 0; i < files.length; i++) {
