@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+
+  http:
+    build:
+      context: .
+      target: http
+    ports: 
+      -  "8000:8000"
+    depends_on:
+      - storage
+    volumes:
+      - "${PWD}/file_records.csv:/file_records.csv"
+
+  storage:
+    build:
+      context: .
+      target: storage
+    ports: 
+      - "4242:4242"
+    volumes:
+      - "${PWD}/storage:/storage"
+
+volumes:
+    fragmo_storage:
+    file_records.csv:
+
+    #TODO know how to open for internal services ports only

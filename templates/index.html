@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Fragmo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <style>
+        body {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <a name "upload " href="http://0.0.0.0:8000/upload "> Upload some</a>
+
+    <br>{{ range $key, $size := . }}
+
+    <form method="get" action="http:/0.0.0.0:8000/download?file='{{ $key }}'">
+        <strong>{{ $key }}</strong> ({{ $size }} bytes)
+        <button type="submit ">download</button>
+    </form>
+
+    <br> {{else}}
+
+    <h3> No files yet. </h3><br>
+
+    <br>{{end}}
+
+
+</body>
+
+</html>

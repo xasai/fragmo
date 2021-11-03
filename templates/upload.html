@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Fragmo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<style>
+    body {
+        text-align: center;
+    }
+</style>
+
+<body>
+    <form id='file-form' enctype='multipart/form-data' method='POST' action="http://0.0.0.0:8000/upload">
+        <!-- <form enctype='multipart/form-data' id='file-form'> !-->
+        <input id='file-input' name='files' type='file' multiple required/> selected files: <span id="fileNum">0 </span> total size: <span id="fileSize">0</span>
+        <input type='submit' value='Send files'>
+    </form>
+
+    <div id='file-list'> </div> <br>
+    <a href="http://0.0.0.0:8000/list"> List all files </a>
+
+</body>
+
+<script type="text/javascript">
+    var fileListDisplay = document.getElementById('file-list');
+
+    function renderFiles() {
+        var size = 0;
+        var files = this.files;
+        for (var i = 0; i < files.length; i++) {
+            size += files[i].size;
+            fileListDisplay.innerHTML += "<p>" + files[i].name + " " + files[i].size + " bytes</p>"
+        }
+        document.getElementById("fileNum").innerHTML = files.length;
+        document.getElementById("fileSize").innerHTML = size + " bytes";
+    }
+
+    function upload(file) {
+        var xhr = new XMLHttpRequest();
+        xhr.upload.onprogress = function(event) {
+            log(event.loaded + ' / ' + event.total);
+        }
+        xhr.onload = xhr.onerror = function() {
+            if (this.status == 200) {
+                log("success");
+            } else {
+                log("error " + this.status);
+            }
+        };
+        xhr.open("POST", "http://0.0.0.0:8000/upload", true);
+        xhr.send(file);
+    }
+
+    document.getElementById('file-input').addEventListener('change', renderFiles, false);
+</script>
+
+</html>

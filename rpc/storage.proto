@@ -1,0 +1,27 @@
+syntax = "proto3";
+package fragmo.storage;
+
+option go_package = "./rpc";
+
+service StorageService {
+	rpc Upload (stream UploadReq) returns (Empty);
+
+	rpc Download (DownloadReq) returns (stream File);
+}
+
+message UploadReq {
+	bytes data = 1;
+	int32 index = 2;
+	string filename = 3; 
+}
+
+message DownloadReq {
+	string filename = 1;
+}
+
+message File {
+	bytes data = 1;
+}
+
+message Empty {
+}
